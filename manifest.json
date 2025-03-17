@@ -1,0 +1,15 @@
+{
+    "manifest_version": 3,
+    "name": "Gamalytic Steam Info",
+    "version": "1.0",
+    "description": "Menampilkan info dari Gamalytic API di halaman Steam.",
+    "permissions": ["scripting", "activeTab"],
+    "host_permissions": ["https://api.gamalytic.com/*"],
+    "content_scripts": [
+      {
+        "matches": ["https://store.steampowered.com/app/*"],
+        "js": ["content.js"]
+      }
+    ]
+  }
+  
