@@ -40,49 +40,53 @@ async function fetchGameInfo() {
          <table class="game_language_options" cellpadding="0" style="width: 100%" cellspacing="0">
     <tbody>
         <tr>
-            <th style="width: 150px;"><b>Gamalytic</b></th>
-            <th style="text-align: right;color: 'rgb(103, 193, 245);
- !important'">Details</th>
+            <th style="width: 150px;text-align: left"><b>Gamalytic Info</b></th>
+            <th style="text-align: right;">Details</th>
         </tr>
         <tr>
             <td style="width: 150px; text-align: left" class="ellipsis"><b>Copies Sold</b></td>
-            <td style="text-align: right;color: 'rgb(103, 193, 245);
- !important'">${formatNumber(data.copiesSold)}</td>
+            <td style="text-align: right;"><span>${formatNumber(
+              data.copiesSold
+            )}</span></td>
         </tr>
         <tr>
             <td style="width: 150px; text-align: left" class="ellipsis"><b>Revenue</b></td>
-            <td style="text-align: right;color: 'rgb(103, 193, 245);
- !important'">${formatNumberShort(data.revenue, "$")} - ${formatNumberShort(
-      data.revenue * 16000,
-      "Rp "
-    )}</td>
+            <td style="text-align: right;"><span>${formatNumberShort(
+              data.revenue,
+              "$"
+            )} - ${formatNumberShort(data.revenue * 16000, "Rp ")}</span></td>
         </tr>
         <tr>
             <td style="width: 150px; text-align: left" class="ellipsis"><b>Owners</b></td>
-            <td style="text-align: right;color: 'rgb(103, 193, 245);
- !important'">${formatNumber(data.owners)}</td>
+            <td style="text-align: right;"><span>${formatNumber(
+              data.owners
+            )}</span></td>
         </tr>
         <tr>
             <td style="width: 150px; text-align: left" class="ellipsis"><b>Release Date</b></td>
-            <td style="text-align: right;color: 'rgb(103, 193, 245);
- !important'">${formatDate(data.releaseDate)}</td>
+            <td style="text-align: right;"><span>${formatDate(
+              data.releaseDate
+            )}</span></td>
         </tr>
         <tr>
             <td style="width: 150px; text-align: left" class="ellipsis"><b>Early Access Release</b></td>
-            <td style="text-align: right;color: 'rgb(103, 193, 245);
- !important'">${formatDate(data.EAReleaseDate)}</td>
+            <td style="text-align: right;"><span>${formatDate(
+              data.EAReleaseDate
+            )}</span></td>
         </tr>
         <tr>
             <td style="width: 150px; text-align: left" class="ellipsis"><b>First Release Date</b></td>
-            <td style="text-align: right;color: 'rgb(103, 193, 245);
- !important'">${formatDate(data.firstReleaseDate)}</td>
+            <td style="text-align: right;"><span>${formatDate(
+              data.firstReleaseDate
+            )}</span></td>
         </tr>
         <tr>
             <td style="width: 150px; text-align: left" class="ellipsis"><b>Early Access Exit</b></td>
-            <td style="text-align: right;color: 'rgb(103, 193, 245);
- !important'">${formatDate(data.earlyAccessExitDate)}</td>
+            <td style="text-align: right;"><span>${formatDate(
+              data.earlyAccessExitDate
+            )}</span></td>
         </tr>
-        <tr>
+        <tr style="border-bottom: 0px solid #ccc;">
             <td colspan="2" style="text-align: center; padding-top: 10px;">
                 <a href="${realUrl}" target="_blank">View on Gamalytic</a>
             </td>
