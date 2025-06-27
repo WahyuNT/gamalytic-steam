@@ -1,15 +1,37 @@
 {
-    "manifest_version": 3,
-    "name": "Gamalytic Steam Info",
-    "version": "1.0",
-    "description": "Menampilkan info dari Gamalytic API di halaman Steam.",
-    "permissions": ["scripting", "activeTab"],
-    "host_permissions": ["https://api.gamalytic.com/*"],
-    "content_scripts": [
-      {
-        "matches": ["https://store.steampowered.com/app/*"],
-        "js": ["content.js"]
-      }
-    ]
+  "manifest_version": 3,
+  "name": "Gamalytic Steam Info",
+  "version": "1.0",
+  "description": "Menampilkan info dari Gamalytic API di halaman Steam.",
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "permissions": [
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://api.gamalytic.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://store.steampowered.com/app/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    },
+    "default_title": "Gamalytic Steam Info"
   }
-  
+}
