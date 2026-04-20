@@ -52,5 +52,5 @@ app.get('/game/:id', async (req, res) => {
 });
 
 app.listen(port, () => {
-    console.log(`Puppeteer API aktif di port ${port}`);
+    console.log(`Aktif di port ${port}`);
 });
