@@ -69,7 +69,7 @@ async function fetchGameInfo() {
   }
 
   try {
-    const response = await fetch(`https://api.gamalytic.com/game/${steamId}`);
+    const response = await fetch(`https://gamalytic.com/api/game-details/${steamId}`);
     const data = await response.json();
     const realUrl = `https://gamalytic.com/game/${steamId}`;
     const netRevenue = data.revenue * 0.7;
