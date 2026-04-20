@@ -1,59 +1,66 @@
-async function fetchGameInfo() {
+function fetchGameInfo() {
   const urlParts = window.location.pathname.split("/");
   const steamId = urlParts[2];
 
   if (!steamId) return;
 
+  // ================= UI HELPERS =================
+  function setText(id, value) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value ?? "...";
+  }
+
+  function hide(id) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = "none";
+  }
+
   function formatDate(timestamp) {
     if (!timestamp) return "...";
-    const date = new Date(timestamp);
-    return date.toLocaleDateString("id-ID", {
+    return new Date(timestamp).toLocaleDateString("id-ID", {
       year: "numeric",
       month: "long",
       day: "numeric",
     });
   }
 
-  function formatNumber(number) {
-    return number ? number.toLocaleString("id-ID") : "...";
+  function formatNumber(num) {
+    return num ? num.toLocaleString("id-ID") : "...";
   }
 
-  function formatNumberShort(number, currency = "") {
-    if (!number) return "...";
-    if (number >= 1e12) {
-      return currency + (number / 1e12).toFixed(2) + " T";
-    } else if (number >= 1e9) {
-      return currency + (number / 1e9).toFixed(2) + " M";
-    } else if (number >= 1e6) {
-      return currency + (number / 1e6).toFixed(0) + " M";
-    } else {
-      return currency + new Intl.NumberFormat("id-ID").format(number);
-    }
+  function formatNumberShort(num, currency = "") {
+    if (!num) return "...";
+    if (num >= 1e12) return currency + (num / 1e12).toFixed(2) + " T";
+    if (num >= 1e9) return currency + (num / 1e9).toFixed(2) + " M";
+    if (num >= 1e6) return currency + (num / 1e6).toFixed(0) + " M";
+    return currency + new Intl.NumberFormat("id-ID").format(num);
   }
 
+  // ================= UI =================
   const container = document.createElement("div");
   container.innerHTML = `
     <div class="block">
-      <table class="game_language_options" cellpadding="0" style="width: 100%" cellspacing="0">
-        <tbody id="gameInfoTable">
+      <table class="game_language_options" style="width:100%">
+        <tbody>
+          <tr><th>Gamalytic Info</th><th style="text-align:right;">Details</th></tr>
+
+          <tr id="wishlistsRow"><td>Wishlists</td><td id="wishlists">...</td></tr>
+          <tr id="topWishRow"><td>Top Wish</td><td id="topWish">...</td></tr>
+          <tr id="predictedM1Row"><td>Predicted M1</td><td id="predictedM1">...</td></tr>
+
+          <tr id="copiesSoldRow"><td>Copies Sold</td><td id="copiesSold">...</td></tr>
+          <tr id="revenueRow"><td>Revenue</td><td id="revenue">...</td></tr>
+          <tr id="netRevenueRow"><td>Net Income</td><td id="netRevenue">...</td></tr>
+          <tr id="ownersRow"><td>Owners</td><td id="owners">...</td></tr>
+
+          <tr id="releaseDateRow"><td>Release</td><td id="releaseDate">...</td></tr>
+          <tr id="eaReleaseDateRow"><td>Early Access</td><td id="eaReleaseDate">...</td></tr>
+          <tr id="firstReleaseDateRow"><td>First Release</td><td id="firstReleaseDate">...</td></tr>
+          <tr id="earlyAccessExitDateRow"><td>Exit EA</td><td id="earlyAccessExitDate">...</td></tr>
+
           <tr>
-            <th style="width: 150px;text-align: left"><b>Gamalytic Info</b></th>
-            <th style="text-align: right;">Details</th>
-          </tr>
-          <tr id="wishlistsRow"><td style="text-align: left;"><b>Wishlists</b></td><td style="text-align: right;"><span id="wishlists">...</span></td></tr>
-          <tr id="topWishRow"><td style="text-align: left;"><b>Top Wish</b></td><td style="text-align: right;"><span id="topWish">...</span></td></tr>
-          <tr id="predictedM1Row"><td style="text-align: left;"><b>Predicted Month 1 Sales</b></td><td style="text-align: right;"><span id="predictedM1">...</span></td></tr>
-          <tr id="copiesSoldRow"><td style="text-align: left;"><b>Copies Sold</b></td><td style="text-align: right;"><span id="copiesSold">...</span></td></tr>
-          <tr id="revenueRow"><td style="text-align: left;"><b>Revenue</b></td><td style="text-align: right;"><span id="revenue">...</span></td></tr>
-          <tr id="netRevenueRow"><td style="text-align: left;"><b>Net Income (-30%)</b></td><td style="text-align: right;"><span id="netRevenue">...</span></td></tr>  
-          <tr id="ownersRow"><td style="text-align: left;"><b>Owners</b></td><td style="text-align: right;"><span id="owners">...</span></td></tr>
-          <tr id="releaseDateRow"><td style="text-align: left;"><b>Release Date</b></td><td style="text-align: right;"><span id="releaseDate">...</span></td></tr>
-          <tr id="eaReleaseDateRow"><td style="text-align: left;"><b>Early Access Release</b></td><td style="text-align: right;"><span id="eaReleaseDate">...</span></td></tr>
-          <tr id="firstReleaseDateRow"><td style="text-align: left;"><b>First Release Date</b></td><td style="text-align: right;"><span id="firstReleaseDate">...</span></td></tr>
-          <tr id="earlyAccessExitDateRow"><td style="text-align: left;"><b>Early Access Exit</b></td><td style="text-align: right;"><span id="earlyAccessExitDate">...</span></td></tr>
-          <tr style="border-bottom: 0px solid #ccc;">
-            <td colspan="2" style="text-align: center; padding-top: 10px;">
-              <a id="gameLink" href="#" target="_blank">View on Gamalytic</a>
+            <td colspan="2" style="text-align:center;">
+              <a id="gameLink" target="_blank">View on Gamalytic</a>
             </td>
           </tr>
         </tbody>
@@ -61,95 +68,73 @@ async function fetchGameInfo() {
     </div>
   `;
 
-  const targetElement = document.querySelector(".rightcol.game_meta_data");
-  if (targetElement) {
-    targetElement.prepend(container);
-  } else {
-    console.warn("Target element tidak ditemukan.");
-  }
+  const target = document.querySelector(".rightcol.game_meta_data");
+  if (target) target.prepend(container);
 
-  try {
-    const response = await fetch(`https://gamalytic.com/api/game-details/${steamId}`);
-    const data = await response.json();
-    const realUrl = `https://gamalytic.com/game/${steamId}`;
-    const netRevenue = data.revenue * 0.7;
+  // ================= FETCH VIA BACKGROUND (NO CORS) =================
+  chrome.runtime.sendMessage(
+    { type: "GET_GAME", steamId },
+    (res) => {
+      if (!res?.success) {
+        console.error("API error", res?.error);
+        return;
+      }
 
-    const hasFullData = data.copiesSold && data.copiesSold > 0;
+      const data = res.data;
 
-    if (hasFullData) {
-      document.getElementById("wishlistsRow").style.display = "none";
-      document.getElementById("topWishRow").style.display = "none";
-      document.getElementById("predictedM1Row").style.display = "none";
+      const revenue = Number(data.revenue || 0);
+      const netRevenue = revenue * 0.7;
 
-      document.getElementById("copiesSold").textContent = formatNumber(
-        data.copiesSold
-      );
-      document.getElementById("revenue").textContent =
-        formatNumberShort(data.revenue, "$") +
-        " (" +
-        formatNumberShort(data.revenue * 16000, "Rp ") +
-        ")";
-      document.getElementById("netRevenue").textContent =
-        formatNumberShort(netRevenue, "$") +
-        " (" +
-        formatNumberShort(netRevenue * 16000, "Rp ") +
-        ")";
-      document.getElementById("owners").textContent = formatNumber(data.owners);
-      document.getElementById("releaseDate").textContent = formatDate(
-        data.releaseDate
-      );
+      const realUrl = `https://gamalytic.com/game/${steamId}`;
 
-      if (data.EAReleaseDate) {
-        document.getElementById("eaReleaseDate").textContent = formatDate(
-          data.EAReleaseDate
+      const hasFullData = data.copiesSold && data.copiesSold > 0;
+
+      if (hasFullData) {
+        hide("wishlistsRow");
+        hide("topWishRow");
+        hide("predictedM1Row");
+
+        setText("copiesSold", formatNumber(data.copiesSold));
+        setText(
+          "revenue",
+          `${formatNumberShort(data.revenue, "$")} (${formatNumberShort(data.revenue * 16000, "Rp ")})`
         );
-      } else {
-        document.getElementById("eaReleaseDateRow").style.display = "none";
-      }
-
-      document.getElementById("firstReleaseDate").textContent = formatDate(
-        data.firstReleaseDate
-      );
-
-      if (data.earlyAccessExitDate) {
-        document.getElementById("earlyAccessExitDate").textContent = formatDate(
-          data.earlyAccessExitDate
+        setText(
+          "netRevenue",
+          `${formatNumberShort(netRevenue, "$")} (${formatNumberShort(netRevenue * 16000, "Rp ")})`
         );
+        setText("owners", formatNumber(data.owners));
+        setText("releaseDate", formatDate(data.releaseDate));
+
+        if (data.EAReleaseDate) setText("eaReleaseDate", formatDate(data.EAReleaseDate));
+        else hide("eaReleaseDateRow");
+
+        setText("firstReleaseDate", formatDate(data.firstReleaseDate));
+
+        if (data.earlyAccessExitDate) setText("earlyAccessExitDate", formatDate(data.earlyAccessExitDate));
+        else hide("earlyAccessExitDateRow");
       } else {
-        document.getElementById("earlyAccessExitDateRow").style.display =
-          "none";
+        setText("wishlists", formatNumber(data.wishlists));
+
+        if (data.topWish) setText("topWish", `#${formatNumber(data.topWish)}`);
+        else hide("topWishRow");
+
+        setText("predictedM1", data.predictions?.m1 ? formatNumber(data.predictions.m1) : "-");
+
+        hide("copiesSoldRow");
+        hide("revenueRow");
+        hide("netRevenueRow");
+        hide("ownersRow");
+        hide("releaseDateRow");
+        hide("eaReleaseDateRow");
+        hide("firstReleaseDateRow");
+        hide("earlyAccessExitDateRow");
       }
-    } else {
-      document.getElementById("wishlists").textContent = formatNumber(
-        data.wishlists
-      );
 
-      if (data.topWish) {
-        document.getElementById("topWish").textContent =
-          "#" + formatNumber(data.topWish);
-      } else {
-        document.getElementById("topWishRow").style.display = "none";
-      }
-
-      document.getElementById("predictedM1").textContent =
-        data.predictions && data.predictions.m1
-          ? formatNumber(data.predictions.m1)
-          : "-";
-
-      document.getElementById("copiesSoldRow").style.display = "none";
-      document.getElementById("revenueRow").style.display = "none";
-      document.getElementById("netRevenueRow").style.display = "none";
-      document.getElementById("ownersRow").style.display = "none";
-      document.getElementById("releaseDateRow").style.display = "none";
-      document.getElementById("eaReleaseDateRow").style.display = "none";
-      document.getElementById("firstReleaseDateRow").style.display = "none";
-      document.getElementById("earlyAccessExitDateRow").style.display = "none";
+      const link = document.getElementById("gameLink");
+      if (link) link.href = realUrl;
     }
-
-    document.getElementById("gameLink").href = realUrl;
-  } catch (error) {
-    console.error("Gagal mengambil data game:", error);
-  }
+  );
 }
 
 fetchGameInfo();
