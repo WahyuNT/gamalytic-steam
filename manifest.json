@@ -13,7 +13,9 @@
     "activeTab"
   ],
   "host_permissions": [
-    "https://api.gamalytic.com/*"
+    "https://api.gamalytic.com/*",
+    "https://store.steampowered.com/*",
+    "https://gamalytic.com/*"
   ],
   "content_scripts": [
     {
