@@ -17,9 +17,7 @@
     "https://store.steampowered.com/*",
     "https://gamalytic.com/*"
   ],
-    "background": {
-    "service_worker": "background.js"
-  },
+    
   "content_scripts": [
     {
       "matches": [
