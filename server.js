@@ -1,28 +1,17 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+puppeteer.use(StealthPlugin());
+
 const express = require('express');
 const app = express();
 const port = 9500;
-
 const VALID_KEY = "nusan789";
-
-// Middleware CORS
-app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-    next();
-});
 
 app.get('/game/:id', async (req, res) => {
     const steamId = req.params.id;
-    const userKey = req.query.key; // Mengambil key dari URL parameter
+    const userKey = req.query.key;
 
-    // Cek Key
-    if (userKey !== VALID_KEY) {
-        console.warn(`[${new Date().toLocaleTimeString()}] Akses ditolak! Key salah untuk ID: ${steamId}`);
-        return res.status(401).json({ error: "Unauthorized: Invalid API Key" });
-    }
-
-    console.log(`[${new Date().toLocaleTimeString()}] Menarik data: ${steamId}`);
+    if (userKey !== VALID_KEY) return res.status(401).json({ error: "Unauthorized" });
 
     const browser = await puppeteer.launch({
         headless: "new",
@@ -31,26 +20,46 @@ app.get('/game/:id', async (req, res) => {
 
     try {
         const page = await browser.newPage();
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+        let gameData = null;
 
-        // Bypass Vercel Checkpoint
-        await page.goto(`https://gamalytic.com/api/game-details/${steamId}`, {
+        // Mendengarkan semua response dari Network
+        page.on('response', async (response) => {
+            const url = response.url();
+            // Mencari request API yang mengandung steamId di namanya
+            if (url.includes(`api/game-details/${steamId}`)) {
+                try {
+                    gameData = await response.json();
+                    console.log(`[${new Date().toLocaleTimeString()}] Data tertangkap dari Network!`);
+                } catch (e) {
+                    // Kadang response bukan JSON, abaikan saja
+                }
+            }
+        });
+
+        // Buka halaman web utamanya, bukan API-nya
+        await page.goto(`https://gamalytic.com/game/${steamId}`, {
             waitUntil: 'networkidle2',
             timeout: 60000
         });
 
-        const content = await page.evaluate(() => document.body.innerText);
-        const jsonData = JSON.parse(content);
+        // Tunggu maksimal 5 detik jika data belum tertangkap (antisipasi delay API)
+        let retry = 0;
+        while (!gameData && retry < 10) {
+            await new Promise(r => setTimeout(r, 500));
+            retry++;
+        }
 
-        res.json(jsonData);
+        if (gameData) {
+            res.json(gameData);
+        } else {
+            res.status(404).json({ error: "Data tidak ditemukan di Network" });
+        }
+
     } catch (error) {
-        console.error("Error Puppeteer:", error.message);
-        res.status(500).json({ error: "Gagal mengambil data", detail: error.message });
+        res.status(500).json({ error: error.message });
     } finally {
         await browser.close();
     }
 });
 
-app.listen(port, () => {
-    console.log(`Aktif di port ${port}`);
-});
+app.listen(port, () => console.log(`Server jalan di port ${port}`));
