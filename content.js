@@ -4,6 +4,7 @@ async function fetchGameInfo() {
 
   if (!steamId) return;
 
+  // Helper Functions
   function formatDate(timestamp) {
     if (!timestamp) return "...";
     const date = new Date(timestamp);
@@ -31,6 +32,7 @@ async function fetchGameInfo() {
     }
   }
 
+  // Buat UI Container
   const container = document.createElement("div");
   container.innerHTML = `
     <div class="block">
@@ -45,7 +47,7 @@ async function fetchGameInfo() {
           <tr id="predictedM1Row"><td style="text-align: left;"><b>Predicted Month 1 Sales</b></td><td style="text-align: right;"><span id="predictedM1">...</span></td></tr>
           <tr id="copiesSoldRow"><td style="text-align: left;"><b>Copies Sold</b></td><td style="text-align: right;"><span id="copiesSold">...</span></td></tr>
           <tr id="revenueRow"><td style="text-align: left;"><b>Revenue</b></td><td style="text-align: right;"><span id="revenue">...</span></td></tr>
-          <tr id="netRevenueRow"><td style="text-align: left;"><b>Net Income (-30%)</b></td><td style="text-align: right;"><span id="netRevenue">...</span></td></tr>  
+          <tr id="netRevenueRow"><td style="text-align: left;"><b>Net Income (-30%)</b></td><td style="text-align: right;"><span id="netRevenue">...</span></td></tr>   
           <tr id="ownersRow"><td style="text-align: left;"><b>Owners</b></td><td style="text-align: right;"><span id="owners">...</span></td></tr>
           <tr id="releaseDateRow"><td style="text-align: left;"><b>Release Date</b></td><td style="text-align: right;"><span id="releaseDate">...</span></td></tr>
           <tr id="eaReleaseDateRow"><td style="text-align: left;"><b>Early Access Release</b></td><td style="text-align: right;"><span id="eaReleaseDate">...</span></td></tr>
@@ -66,17 +68,17 @@ async function fetchGameInfo() {
     targetElement.prepend(container);
   }
 
-  try {
-    const response = await fetch(`https://gamalytic.wahyunt.me/game/${steamId}?key=nusan789`, {
-      method: 'GET',
-      headers: {
-        'Accept': 'application/json'
-      }
-    });
-    const jsonResponse = await response.json();
+  // Ambil data lewat Background Script untuk bypass CORS
+  const apiUrl = `https://gamalytic.wahyunt.me/game/${steamId}?key=nusan789`;
 
-    // PERBAIKAN DI SINI: Mapping ke jsonResponse.data
-    const data = jsonResponse.data;
+  chrome.runtime.sendMessage({ action: "fetchGamalytic", url: apiUrl }, (response) => {
+    if (chrome.runtime.lastError || !response || !response.success) {
+      console.error("Gagal mengambil data game via background:", chrome.runtime.lastError || response?.error);
+      return;
+    }
+
+    const jsonResponse = response.data;
+    const data = jsonResponse.data || jsonResponse;
 
     if (!data) {
       console.error("Data tidak ditemukan di JSON");
@@ -86,7 +88,6 @@ async function fetchGameInfo() {
     const realUrl = `https://gamalytic.com/game/${steamId}`;
     const revenue = data.revenue || 0;
     const netRevenue = revenue * 0.7;
-
     const hasFullData = data.copiesSold && data.copiesSold > 0;
 
     if (hasFullData) {
@@ -117,10 +118,8 @@ async function fetchGameInfo() {
         document.getElementById("earlyAccessExitDateRow").style.display = "none";
       }
     } else {
-      // Jika game belum rilis atau data penjualan belum ada
       document.getElementById("wishlists").textContent = (data.wishlists === true) ? "Tracked" : formatNumber(data.wishlists);
 
-      // Ambil Top Wish dari history terakhir jika tersedia
       if (data.history && data.history.length > 0) {
         const latest = data.history[data.history.length - 1];
         document.getElementById("topWish").textContent = latest.rank ? "#" + formatNumber(latest.rank) : "-";
@@ -130,15 +129,12 @@ async function fetchGameInfo() {
 
       document.getElementById("predictedM1").textContent = "-";
 
-      // Sembunyikan baris rilis
       const rowsToHide = ["copiesSoldRow", "revenueRow", "netRevenueRow", "ownersRow", "releaseDateRow", "eaReleaseDateRow", "firstReleaseDateRow", "earlyAccessExitDateRow"];
       rowsToHide.forEach(id => document.getElementById(id).style.display = "none");
     }
 
     document.getElementById("gameLink").href = realUrl;
-  } catch (error) {
-    console.error("Gagal mengambil data game:", error);
-  }
+  });
 }
 
 fetchGameInfo();
