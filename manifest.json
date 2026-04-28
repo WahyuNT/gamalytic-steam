@@ -2,6 +2,11 @@
   "manifest_version": 3,
   "name": "Gamalytic Steam Info",
   "version": "1.1",
+    "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
   "permissions": [
     "activeTab"
   ],
@@ -23,7 +28,12 @@
       "run_at": "document_end"
     }
   ],
-  "action": {
+   "action": {
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    },
     "default_title": "Gamalytic Steam Info"
   }
 }
