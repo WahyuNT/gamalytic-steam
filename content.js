@@ -21,21 +21,12 @@ async function fetchGameInfo() {
 
   function formatNumberShort(number, currency = "") {
     if (!number) return "...";
-
-    const isRupiah = currency.includes("Rp");
-
     if (number >= 1e12) {
-      const unit = isRupiah ? " T" : " B";
-      return currency + (number / 1e12).toFixed(2) + unit;
+      return currency + (number / 1e12).toFixed(2) + " T";
     } else if (number >= 1e9) {
-      const unit = isRupiah ? " M" : " B";
-      return currency + (number / 1e9).toFixed(2) + unit;
+      return currency + (number / 1e9).toFixed(2) + " M";
     } else if (number >= 1e6) {
-      const unit = isRupiah ? " Jt" : " M";
-      return currency + (number / 1e6).toFixed(2) + unit;
-    } else if (number >= 1e3) {
-      const unit = isRupiah ? " Rb" : " K";
-      return currency + (number / 1e3).toFixed(0) + unit;
+      return currency + (number / 1e6).toFixed(0) + " JT";
     } else {
       return currency + new Intl.NumberFormat("id-ID").format(number);
     }
@@ -48,23 +39,23 @@ async function fetchGameInfo() {
       <table class="game_language_options" cellpadding="0" style="width: 100%" cellspacing="0">
         <tbody id="gameInfoTable">
           <tr>
-            <th style="width: 150px;text-align: left"><b>Informasi Gamalytic</b></th>
-            <th style="text-align: right;">Detail</th>
+            <th style="width: 150px;text-align: left"><b>Gamalytic Info</b></th>
+            <th style="text-align: right;">Details</th>
           </tr>
-          <tr id="wishlistsRow"><td style="text-align: left;"><b>Wishlist</b></td><td style="text-align: right;"><span id="wishlists">...</span></td></tr>
-          <tr id="topWishRow"><td style="text-align: left;"><b>Peringkat Wishlist</b></td><td style="text-align: right;"><span id="topWish">...</span></td></tr>
-          <tr id="predictedM1Row"><td style="text-align: left;"><b>Est. Penjualan Bln 1</b></td><td style="text-align: right;"><span id="predictedM1">...</span></td></tr>
-          <tr id="copiesSoldRow"><td style="text-align: left;"><b>Terjual</b></td><td style="text-align: right;"><span id="copiesSold">...</span></td></tr>
-          <tr id="revenueRow"><td style="text-align: left;"><b>Pendapatan Kotor</b></td><td style="text-align: right;"><span id="revenue">...</span></td></tr>
-          <tr id="netRevenueRow"><td style="text-align: left;"><b>Pendapatan Bersih (-30%)</b></td><td style="text-align: right;"><span id="netRevenue">...</span></td></tr>   
-          <tr id="ownersRow"><td style="text-align: left;"><b>Pemilik (Owners)</b></td><td style="text-align: right;"><span id="owners">...</span></td></tr>
-          <tr id="releaseDateRow"><td style="text-align: left;"><b>Tanggal Rilis</b></td><td style="text-align: right;"><span id="releaseDate">...</span></td></tr>
-          <tr id="eaReleaseDateRow"><td style="text-align: left;"><b>Rilis Early Access</b></td><td style="text-align: right;"><span id="eaReleaseDate">...</span></td></tr>
-          <tr id="firstReleaseDateRow"><td style="text-align: left;"><b>Rilis Pertama</b></td><td style="text-align: right;"><span id="firstReleaseDate">...</span></td></tr>
-          <tr id="earlyAccessExitDateRow"><td style="text-align: left;"><b>Keluarnya Early Access</b></td><td style="text-align: right;"><span id="earlyAccessExitDate">...</span></td></tr>
+          <tr id="wishlistsRow"><td style="text-align: left;"><b>Wishlists</b></td><td style="text-align: right;"><span id="wishlists">...</span></td></tr>
+          <tr id="topWishRow"><td style="text-align: left;"><b>Top Wish</b></td><td style="text-align: right;"><span id="topWish">...</span></td></tr>
+          <tr id="predictedM1Row"><td style="text-align: left;"><b>Predicted Month 1 Sales</b></td><td style="text-align: right;"><span id="predictedM1">...</span></td></tr>
+          <tr id="copiesSoldRow"><td style="text-align: left;"><b>Copies Sold</b></td><td style="text-align: right;"><span id="copiesSold">...</span></td></tr>
+          <tr id="revenueRow"><td style="text-align: left;"><b>Revenue</b></td><td style="text-align: right;"><span id="revenue">...</span></td></tr>
+          <tr id="netRevenueRow"><td style="text-align: left;"><b>Net Income (-30%)</b></td><td style="text-align: right;"><span id="netRevenue">...</span></td></tr>   
+          <tr id="ownersRow"><td style="text-align: left;"><b>Owners</b></td><td style="text-align: right;"><span id="owners">...</span></td></tr>
+          <tr id="releaseDateRow"><td style="text-align: left;"><b>Release Date</b></td><td style="text-align: right;"><span id="releaseDate">...</span></td></tr>
+          <tr id="eaReleaseDateRow"><td style="text-align: left;"><b>Early Access Release</b></td><td style="text-align: right;"><span id="eaReleaseDate">...</span></td></tr>
+          <tr id="firstReleaseDateRow"><td style="text-align: left;"><b>First Release Date</b></td><td style="text-align: right;"><span id="firstReleaseDate">...</span></td></tr>
+          <tr id="earlyAccessExitDateRow"><td style="text-align: left;"><b>Early Access Exit</b></td><td style="text-align: right;"><span id="earlyAccessExitDate">...</span></td></tr>
           <tr style="border-bottom: 0px solid #ccc;">
             <td colspan="2" style="text-align: center; padding-top: 10px;">
-              <a id="gameLink" href="#" target="_blank">Lihat di Gamalytic</a>
+              <a id="gameLink" href="#" target="_blank">View on Gamalytic</a>
             </td>
           </tr>
         </tbody>
@@ -127,7 +118,7 @@ async function fetchGameInfo() {
         document.getElementById("earlyAccessExitDateRow").style.display = "none";
       }
     } else {
-      document.getElementById("wishlists").textContent = (data.wishlists === true) ? "Terlacak" : formatNumber(data.wishlists);
+      document.getElementById("wishlists").textContent = (data.wishlists === true) ? "Tracked" : formatNumber(data.wishlists);
 
       if (data.history && data.history.length > 0) {
         const latest = data.history[data.history.length - 1];
